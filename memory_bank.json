@@ -1,0 +1,18 @@
+{
+    "ayush": {
+        "pantry": [
+            "soy sauce",
+            "rice",
+            "bell peppers",
+            "garlic",
+            "broccoli",
+            "onion",
+            "chicken breast",
+            "ginger"
+        ],
+        "liked_recipes": [
+            "broccoli cheddar soup"
+        ],
+        "disliked_recipes": []
+    }
+}
