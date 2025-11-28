@@ -1,32 +1,91 @@
-# AI Sous-Chef CLI Agent
+<div align="center">
 
-## Project Overview
+<pre>
+   ___    ____         _________              __  _              
+  / _ |  / / /________/ / __/ __/__  ___ ___ _/ /_(_)__  ___  ___ 
+ / __ | / / /__/___/ / _// _// _ \/ -_) _ `/ __/ / _ \/ -_) -_)
+/_/ |_|/_/\   / /_/ /___/___/_//_/\__/_/\_,_/\__/_/\___/\__/
+                                                               
+</pre>
 
-This project implements an **AI Sous-Chef CLI Agent**, a conversational concierge agent designed to act as a personal kitchen assistant accessible directly from your command line. It streamlines meal planning, recipe generation, and shopping list creation, aiming to reduce food waste and decision fatigue in the kitchen.
+**AI Sous-Chef: Your Personal AI Kitchen Assistant**
 
-This agent demonstrates key concepts of building intelligent agents, including tool use, persistent memory, and observable decision-making, as taught in the Capstone course.
+</div>
 
-## Features & Implemented Concepts
+<div align="center">
 
-This project directly demonstrates the following key concepts from the course curriculum:
+[![Python Version][python-shield]](#)
+[![License: MIT][license-shield]](LICENSE.md)
+[![Pull Requests Welcome][pr-shield]](#contributing)
 
-1.  **Agent powered by an LLM:** The core of the Sous-Chef is driven by the Google Gemini model, which processes user requests, makes decisions, and generates responses.
-2.  **Tools (Custom Tools):** The agent is equipped with a suite of custom-built tools that allow it to interact with its environment (your pantry, calendar) and perform specific actions (generate recipes, meal plans).
-3.  **Sessions & Memory (Long-Term Memory):** The agent maintains a persistent memory using `memory_bank.json`. It remembers your pantry items, liked, and disliked recipes across sessions, providing a personalized experience.
-4.  **Loop Agents:** The agent operates in a continuous "Observe-Think-Act" loop within the command line, allowing for an interactive and stateful conversation.
-5.  **Observability:** The agent's decision-making process is made transparent through verbose logging (`[THINKING]`) that shows when it decides to use a tool and with what parameters.
+</div>
 
-## Problem, Solution, and Value Proposition (The Pitch)
+An intelligent, conversational CLI agent built with Google's Gemini LLM that revolutionizes home cooking by making meal planning, recipe discovery, and pantry management effortless and personal.
 
-**Problem:** The modern kitchen is chaotic. Juggling recipes, managing ingredients, and deciding "what's for dinner" leads to decision fatigue and food waste. Users often struggle to utilize ingredients they already have, leading to repetitive meals or forgotten items.
+---
 
-**Solution:** The **AI Sous-Chef CLI Agent** acts as a personal, intelligent assistant that lives in your terminal. It provides on-demand meal planning, recipe suggestions tailored to your current pantry and preferences, and helps you keep track of what you have. By leveraging agentic principles, it automates decision-making processes that typically consume time and mental effort.
+## Overview
 
-**Value Proposition:** The agent saves time and reduces mental load by streamlining kitchen tasks. It minimizes food waste by encouraging the use of existing ingredients. Its personalized memory learns from your feedback, offering increasingly relevant and satisfying culinary experiences. The clear observability allows users to understand and trust the agent's decisions.
+The AI Sous-Chef is a Python-based agent that acts as a smart kitchen assistant. It leverages a Large Language Model (LLM) to understand natural language commands, manage a persistent pantry, and generate personalized meal plans and recipes. The agent is designed with a tool-based architecture, allowing for easy extension and integration of new capabilities.
+
+This project serves as a powerful demonstration of modern agentic AI systems, including long-term memory management and dynamic tool use.
+
+## Demo
+
+Here is a sample interaction with the AI Sous-Chef:
+
+```
+Welcome to AI Sous-Chef CLI Agent!
+Type 'exit' or 'quit' to end the session.
+
+You: Hello! I just got back from the store. I have chicken breast, a head of broccoli, and some white rice.
+Agent: Added ['chicken breast', 'broccoli', 'white rice'] to pantry.
+
+You: What's in my pantry right now?
+Agent: Current Pantry: broccoli, chicken breast, white rice
+
+You: That's right. Can you suggest a simple recipe using those ingredients? I only have about 30 minutes.
+Agent (Recipe): Simple Lemon-Herb Chicken and Broccoli
+  Description: A quick, healthy, and delicious one-pan meal perfect for a weeknight.
+  Servings: 2
+  Prep Time: 5 minutes
+  Cook Time: 20 minutes
+  Ingredients:
+    - 1 lb chicken breast, cut into bite-sized pieces
+    - 1 head of broccoli, cut into florets
+    - 1 cup white rice
+    - 1 lemon, juiced
+    - 2 tbsp olive oil
+    - 1 tsp dried oregano
+    - Salt and pepper to taste
+  Instructions:
+    - Cook the white rice according to package directions.
+    - While the rice cooks, toss the chicken and broccoli with olive oil, lemon juice, oregano, salt, and pepper.
+    - Heat a large skillet over medium-high heat. Add the chicken and broccoli mixture.
+    - Cook for 15-20 minutes, stirring occasionally, until the chicken is cooked through and the broccoli is tender-crisp.
+    - Serve the chicken and broccoli over the cooked rice.
+
+You: I loved that recipe!
+Agent: Feedback for 'simple lemon-herb chicken and broccoli' received.
+
+You: exit
+Session ended. Goodbye!
+```
+
+## Features
+
+-   **Conversational Interface:** Interact naturally via a simple command-line interface.
+-   **Smart Pantry Management:** The agent maintains a persistent state of your pantry across sessions.
+-   **Intelligent Recipe Generation:** Get recipes tailored to your available ingredients, dietary needs, and time constraints.
+-   **Personalized Meal Planning:** Generate multi-day meal plans and export them to a calendar file (`.ics`).
+-   **Long-Term Memory:** The agent remembers your liked and disliked recipes to personalize future suggestions.
+-   **Tool-Based Architecture:** The agent uses a set of defined "tools" to perform actions, making the system modular and extensible.
 
 ## Architecture
 
-The AI Sous-Chef CLI Agent follows a classic agentic architecture based on the "Observe-Think-Act" loop:
+The agent operates on an "Observe-Think-Act" loop, using the Gemini LLM to reason and decide which tool to use based on the user's prompt.
+
+<div align="center">
 
 ```
 +------------------+     +---------------------+
@@ -50,7 +109,7 @@ The AI Sous-Chef CLI Agent follows a classic agentic architecture based on the "
                   |  - Meal Plan Gen.   |
                   |  - Recipe Gen.      |
                   |  - Calendar Export  |
-                  +----------|----------+
+                  +----------|----------+      
                              |
                              v
                   +------------------+
@@ -58,82 +117,144 @@ The AI Sous-Chef CLI Agent follows a classic agentic architecture based on the "
                   | (memory_bank.json)|
                   +------------------+
 ```
+</div>
 
-1.  **User Input (Observe):** The agent continuously prompts the user for commands or questions via the CLI.
-2.  **SousChefAgent (Think):** The user's input, along with the agent's current memory (pantry, preferences), is sent to the LLM. The LLM then "thinks" about the request and decides if a tool is needed or if a conversational response is appropriate.
-3.  **LLM (Google Gemini):** The generative model processes the input and system instructions. If a tool is required, it outputs a structured JSON object specifying the `tool_code` and `tool_params`. Otherwise, it generates a conversational text response.
-4.  **Tool Dispatcher (Act):** The agent parses the LLM's response. If it's a tool call, the dispatcher executes the corresponding Python function (tool) with the provided parameters.
-5.  **Agent Tools (Act):** These are Python functions that perform specific tasks, such as modifying the pantry, querying the LLM for a meal plan, generating a recipe, or creating an `.ics` calendar file.
-6.  **Memory Bank:** A `memory_bank.json` file is used for long-term persistence of user-specific data, including pantry contents and recipe feedback.
-
-## Setup and Installation
+## Getting Started
 
 ### Prerequisites
 
-*   Python 3.8+
-*   `pip` (Python package installer)
+-   Python 3.8+
+-   An active Google Gemini API Key. You can get one at [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### 1. Navigate to the Agent Directory
-
-Open your terminal or command prompt and navigate to the `agent2.0` directory:
+### 1. Clone the Repository
 
 ```bash
-cd agent2.0
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
 ```
 
 ### 2. Install Dependencies
 
-Install the required Python packages:
+It's recommended to use a virtual environment.
 
 ```bash
-pip install -q -U google-generativeai Flask-Cors ics
+# Create and activate a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+
+# Install required packages
+pip install -r requirements.txt
 ```
-*(Note: Flask-Cors is listed in the original requirements, though technically not strictly needed for a pure CLI agent, it's included for consistency with the initial project setup if a web component were ever re-added.)*
+*(Note: You may need to create a `requirements.txt` file from the existing dependencies if it's not already present).*
 
-### 3. Set Your Gemini API Key
 
-This project requires a Google Gemini API key.
+### 3. Set Your API Key
 
-1.  Go to the [Google AI Studio](https://aistudio.google.com/app/apikey) to create your API key.
-2.  **Set an Environment Variable:** For the application to work securely, you must set an environment variable named `GEMINI_API_KEY`.
-    *   **Windows (Command Prompt):** `set GEMINI_API_KEY=YOUR_API_KEY`
-    *   **Windows (PowerShell):** `$env:GEMINI_API_KEY="YOUR_API_KEY"`
-    *   **macOS/Linux:** `export GEMINI_API_KEY=YOUR_API_KEY`
-    (Replace `YOUR_API_KEY` with your actual key).
+The application requires your Google Gemini API key to be set as an environment variable.
 
-*Note: For quick testing, the agent contains a fallback key, but using an environment variable is strongly recommended.*
+-   **Windows (PowerShell):** `$env:GEMINI_API_KEY="YOUR_API_KEY"`
+-   **macOS/Linux:** `export GEMINI_API_KEY='YOUR_API_KEY'`
+
+*(Replace `YOUR_API_KEY` with your actual key).*
 
 ### 4. Run the Agent
 
-Execute the Python script from your terminal:
+Start the interactive CLI agent:
 
 ```bash
 python main.py
 ```
 
-### 5. Interact with the Agent
+## Deployment
 
-Once running, you can type your requests and commands directly into the terminal. Observe the `[THINKING]` logs to see the agent's decision-making process.
+This agent is designed to be deployed as a containerized application, for example, on Google Cloud Run. The included `Dockerfile` allows for easy image building.
 
-**Example Interactions:**
+### 1. Build the Docker Image
 
-*   `Hello Sous-Chef, what's in my pantry?` (Expects `view_pantry` tool call)
-*   `I have chicken, broccoli, and rice.` (Expects `add_to_pantry` tool call)
-*   `Suggest a recipe using chicken and broccoli.` (Expects `generate_recipe` tool call)
-*   `Remove rice from my pantry.` (Expects `remove_from_pantry` tool call)
-*   `Create a 3-day vegetarian meal plan.` (Expects `generate_meal_plan` tool call)
-*   `I liked the "Spicy Chicken Stir-Fry" recipe.` (Expects `add_feedback` tool call)
+From the root of the project directory, run the following command to build the Docker image:
 
-Type `exit` or `quit` to end the session. Your pantry and feedback will be saved automatically.
+```bash
+docker build -t ai-sous-chef .
+```
 
-## Project Journey & Future Enhancements
+### 2. Run the Container Locally (Optional)
 
-The project began as a Flask web application, but to fully embrace and demonstrate the core agentic concepts, it was refactored into a Command-Line Interface (CLI) agent. This transition allowed for a deeper focus on the agent's internal "Think-Act" loop, tool use, and state management.
+To test the container on your local machine, run it in interactive mode:
 
-**Future Enhancements:**
+```bash
+# Don't forget to pass your API key as an environment variable
+docker run -it -e GEMINI_API_KEY="YOUR_API_KEY" ai-sous-chef
+```
 
-*   **Advanced Tooling:** Integrate external APIs (e.g., grocery delivery services, nutritional databases) as new tools.
-*   **Multi-Agent Systems:** Implement a system where different agents collaborate on complex tasks (e.g., a "Planning Agent" and a "Shopping Agent").
-*   **Natural Language Parameter Extraction:** Improve the LLM's ability to extract tool parameters more reliably from less structured user input.
-*   **Event-Driven Interactions:** Move beyond simple request-response to a more event-driven model where the agent can proactively offer suggestions.
-*   **Web-based Agent UI:** Develop a new, dedicated web interface designed specifically to interact with this CLI agent's input/output, offering a more user-friendly experience without sacrificing the agent's core principles.
+### 3. Deploy to Google Cloud Run
+
+To deploy the agent as a continuously running service, you can use Google Cloud Run.
+
+**Prerequisites:**
+-   Google Cloud SDK (`gcloud`) installed and configured.
+-   Enable the Artifact Registry and Cloud Run APIs in your GCP project.
+
+**Steps:**
+
+```bash
+# 1. Configure Docker to authenticate with Google Cloud Artifact Registry
+gcloud auth configure-docker
+
+# 2. Define environment variables for convenience
+export PROJECT_ID="your-gcp-project-id"
+export REGION="your-gcp-region" # e.g., us-central1
+export IMAGE_NAME="ai-sous-chef"
+export IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${IMAGE_NAME}"
+
+# 3. Build and push the image to Google Artifact Registry
+docker build -t ${IMAGE_TAG} .
+docker push ${IMAGE_TAG}
+
+# 4. Deploy to Cloud Run, passing the Gemini API key as a secret
+# (It's recommended to use Secret Manager for your API key)
+gcloud run deploy ${IMAGE_NAME} \
+  --image ${IMAGE_TAG} \
+  --region ${REGION} \
+  --set-secrets="GEMINI_API_KEY=your-secret-name:latest" \
+  --no-allow-unauthenticated
+```
+*Note: The CLI agent runs in an interactive loop. For a non-interactive deployment (e.g., as a backend for a web app), you would need to adapt `main.py` to handle requests differently (e.g., via an API framework like Flask or FastAPI).*
+
+## Contributing
+
+Contributions are welcome! Whether it's reporting a bug, suggesting a new feature, or submitting a pull request, we appreciate your help.
+
+### How to Contribute
+
+1.  **Fork the repository** on GitHub.
+2.  **Clone your fork** to your local machine.
+3.  **Create a new branch** for your feature or bug fix (`git checkout -b feature/your-feature-name`).
+4.  **Make your changes** and commit them with a clear, descriptive commit message.
+5.  **Push your changes** to your fork on GitHub (`git push origin feature/your-feature-name`).
+6.  **Open a Pull Request** to the `main` branch of the original repository.
+
+### Reporting Bugs
+
+Please open an issue on GitHub and include:
+- A clear, descriptive title.
+- Steps to reproduce the bug.
+- The expected behavior and what actually happened.
+- Your operating system and Python version.
+
+## Roadmap
+
+This project has a strong foundation. Future enhancements could include:
+
+-   [ ] **External API Tools:** Integrate with grocery delivery APIs or nutritional databases.
+-   [ ] **Proactive Suggestions:** Allow the agent to make suggestions based on timers or pantry item expiry.
+-   [ ] **Multi-Modal Input:** Enable users to provide images of their pantry for automatic ingredient detection.
+-   [ ] **Web Interface:** Build a dedicated web UI to interact with the agent backend.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE.md](LICENSE.md) file for details.
+
+<!-- Markdown Shields -->
+[python-shield]: https://img.shields.io/badge/Python-3.8+-blue.svg
+[license-shield]: https://img.shields.io/badge/License-MIT-green.svg
+[pr-shield]: https://img.shields.io/badge/Pull_Requests-Welcome-brightgreen.svg

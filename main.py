@@ -1,6 +1,7 @@
 import google.generativeai as genai
 import os
 import json
+import re
 from ics import Calendar, Event
 from datetime import datetime, timedelta
 import tempfile # Added for calendar file creation
@@ -17,7 +18,7 @@ class SousChefAgent:
         # Fallback for testing purposes if not set.
         self.api_key = os.environ.get("GEMINI_API_KEY")
         if not self.api_key:
-            self.api_key = "AIzaSyCHxw7Jw22307-gFZfiigAlvX7f-z9DObw" # Fallback key for testing
+            raise ValueError("GEMINI_API_KEY environment variable not set. Please provide a valid API key.")
         
         genai.configure(api_key=self.api_key)
         
@@ -200,7 +201,6 @@ class SousChefAgent:
         Dispatches and executes the appropriate tool function based on the LLM's
         tool call. This is the 'Act' part of the agent's Think-Act cycle.
         """
-        print(f"[THINKING] Executing tool: {tool_code} with parameters: {tool_params}")
         if tool_code == "add_to_pantry":
             # Tool: Add ingredients to the user's pantry
             self.add_to_pantry(tool_params["ingredients"])
@@ -234,24 +234,31 @@ class SousChefAgent:
         This method embodies the 'Think' part of the agent's Think-Act cycle.
         """
         try:
-            # Send the user's prompt to the LLM
             response = self.conversation.send_message(prompt)
-            cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
+            raw_text = response.text
+
+            # Use regex to find a JSON object in the response
+            json_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+
+            if json_match:
+                json_string = json_match.group(0)
+                try:
+                    json_response = json.loads(json_string)
+                    # If it's a valid tool call, execute it
+                    if "tool_code" in json_response and "tool_params" in json_response:
+                        return self._call_tool(json_response["tool_code"], json_response["tool_params"])
+                    else:
+                        # It's a valid JSON response, but not a tool call (e.g., a recipe)
+                        return json_response
+                except json.JSONDecodeError:
+                    # Found something that looked like JSON, but it was invalid.
+                    # Fall through to treat the entire text as a conversational response.
+                    pass
             
-            # Attempt to parse the LLM's response as JSON
-            json_response = json.loads(cleaned_text)
-            
-            # Check if the LLM intended to call a tool
-            if "tool_code" in json_response and "tool_params" in json_response:
-                # If it's a tool call, execute the tool
-                return self._call_tool(json_response["tool_code"], json_response["tool_params"])
-            else:
-                # Otherwise, it's a structured conversational response
-                return json_response
-        except json.JSONDecodeError:
-            # If the response is not valid JSON, treat it as a direct conversational text reply
-            print(f"[THINKING] LLM returned a non-JSON conversational response.")
+            # If no JSON was found or parsing failed, treat the whole thing as a conversation
+            cleaned_text = raw_text.strip().replace("```json", "").replace("```", "")
             return {"response": cleaned_text}
+
         except Exception as e:
             # General error during AI interaction
             return {"error": f"Failed to get response from model: {e}", "raw_response": response.text if 'response' in locals() else "No response from model."}
@@ -298,7 +305,6 @@ class SousChefAgent:
         }}
         """
         # Call the underlying LLM with a prompt specifically designed to get JSON
-        print("[THINKING] Asking LLM to generate meal plan...")
         response_json = self.ask(prompt) 
         return response_json
 
@@ -342,7 +348,7 @@ class SousChefAgent:
           ]
         }}
         """
-        print("[THINKING] Asking LLM to generate recipe...")
+        print()
         response_json = self.ask(prompt)
         return response_json
 
